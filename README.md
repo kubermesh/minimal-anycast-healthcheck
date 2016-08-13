@@ -1,0 +1,1 @@
+# minimal-anycast-healthcheck
