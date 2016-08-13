@@ -1,0 +1,36 @@
+#!/bin/sh
+set -e
+
+if [ -z "${PORT}" ]; then
+    (>&2 echo "Missing variable PORT")
+    exit 1
+fi
+
+if [ -z "${DEVICE}" ]; then
+    (>&2 echo "Missing variable DEVICE")
+    exit 1
+fi
+
+if [ -z "${IP}" ]; then
+    (>&2 echo "Missing variable IP")
+    exit 1
+fi
+
+while true; do
+    if echo | nc -w 1 localhost ${PORT}; then
+        echo Daemon is up
+        if ! ip addr show dev ${DEVICE} | grep -q ${IP}; then
+            echo Adding ${IP} to ${DEVICE}...
+            ip addr add ${IP} dev ${DEVICE}
+        fi
+    else
+        echo Daemon is down
+        if ip addr show dev ${DEVICE} | grep -q ${IP}; then
+            echo Removing ${IP} from ${DEVICE}...
+            ip addr del ${IP} dev ${DEVICE}
+        fi
+    fi
+
+sleep 10
+done
+
